@@ -1,0 +1,7 @@
+/* Localized versions of Info.plist keys */
+
+"THE_INTERNET" = "Интернет";
+"TITLE_STICKERS" = "графика";
+"BTN_RESTORE" = "купленный";
+"BTN_BUY" = "купить";
+"BTN_DONE" = "выход";

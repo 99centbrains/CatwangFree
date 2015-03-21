@@ -1,0 +1,7 @@
+/* Localized versions of Info.plist keys */
+
+"THE_INTERNET" = "INTERWEB";
+"TITLE_STICKERS" = "Stickers";
+"BTN_RESTORE" = "Restore";
+"BTN_BUY" = "Buy";
+"BTN_DONE" = "Done";

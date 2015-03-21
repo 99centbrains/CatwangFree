@@ -1,0 +1,7 @@
+/* Localized versions of Info.plist keys */
+
+"THE_INTERNET" = "PLUS";
+"TITLE_STICKERS" = "Graphique";
+"BTN_RESTORE" = "Restaurer";
+"BTN_BUY" = "Acheter";
+"BTN_DONE" = "Sortie";
