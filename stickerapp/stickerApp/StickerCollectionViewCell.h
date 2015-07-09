@@ -10,7 +10,6 @@
 
 @interface StickerCollectionViewCell : UICollectionViewCell
 
-@property (nonatomic, weak)IBOutlet UIImageView * ibo_cellView;
-@property (nonatomic, strong) NSURL *staticURL;
-
+@property (nonatomic, weak) IBOutlet UIImageView * ibo_cellView;
+@property (nonatomic, weak) IBOutlet UIImageView * ibo_lockIcon;
 @end

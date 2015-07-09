@@ -10,42 +10,31 @@
 #import "SVProgressHUD.h"
 #import "CWInAppHelper.h"
 #import "StickerCollectionViewCell.h"
-#import "Flurry.h"
 
 #import <QuartzCore/QuartzCore.h>
-#import "CybrFMStickrViewController.h"
 #import "StickerTitleCollectionReusableView.h"
 #import <iAd/iAd.h>
 
 #import "CWInAppHelper.h"
+#import "StickerPackCollectionViewCell.h"
+#import "StickerTitleCollectionReusableView.h"
 
-@interface SelectStickerQuickViewController ()<UICollectionViewDataSource, UICollectionViewDelegate, ADBannerViewDelegate,CybrFMStickrViewControllerDelegate, StickerTitleCollectionReusableViewDelegate>{
-    
+@interface SelectStickerQuickViewController ()<UICollectionViewDataSource, UICollectionViewDelegate, ADBannerViewDelegate, StickerTitleCollectionReusableViewDelegate, StickerPackCollectionViewCellDelegate>{
     
     BOOL iAdBannerVisible;
 
-    
 }
 
-
-
-@property (nonatomic, strong)  NSMutableArray *stickerpacks;
-@property (nonatomic, strong) NSArray *stickerPackIDs;
-@property (nonatomic, strong) NSDictionary *stickerPackDictionary;
-
+@property (nonatomic, strong)  NSMutableArray *prop_stickerPacks;
+@property (nonatomic, weak)  IBOutlet UIPageControl *ibo_pageControl;
 @property (nonatomic, strong) ADBannerView *iAdBanner;
-
 @property (nonatomic, weak) IBOutlet UICollectionView *ibo_collectionView;
+
 @end
 
 @implementation SelectStickerQuickViewController
 
-
-
 @synthesize delegate = _delegate;
-
-
-
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
     
@@ -58,55 +47,37 @@
 
 - (IBAction)iba_dissmissSelectStickerView:(id)sender {
     
-    [self.delegate selectStickerQuickViewControllerDidCancel:self];
+    
     
 }
 
 - (void)viewDidLoad {
 
+    //NSLog(@"PROP %@", [self getStickerPackFromDIR:[_prop_folder_directories objectAtIndex:0]]);
     
-    [self.navigationController setNavigationBarHidden:NO animated:NO];
-    [self.navigationController.navigationBar setTintColor:[UIColor magentaColor]];
+    _prop_stickerPacks = [[NSMutableArray alloc] init];
+    for (NSArray *pack in _prop_folder_directories){
+       
+        [_prop_stickerPacks addObject:[self getStickerPackFromDIR:[pack objectAtIndex:2]]];
+        //NSLog(@"PROP %@", [self getStickerPackFromDIR:[pack objectAtIndex:2]]);
+    }
     
+    _ibo_pageControl.numberOfPages = _prop_stickerPacks.count;
     
-    UIBarButtonItem *leftButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"BTN_RESTORE", @"Title") style:UIBarButtonItemStylePlain target:self
-                                                                  action:@selector(iba_restorePurchases:)];
-    self.navigationItem.leftBarButtonItem = leftButton;
-    self.navigationItem.leftBarButtonItem.enabled = NO;
+    //_prop_folder_directories = nil;
     
-    UIBarButtonItem *rightButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"BTN_DONE", @"Title") style:UIBarButtonItemStylePlain target:self
-                                                                   action:@selector(iba_dismissCategoryView:)];
-    self.navigationItem.rightBarButtonItem = rightButton;
-    
-    
-    self.title = NSLocalizedString(@"TITLE_STICKERS", @"Title");
-    self.stickerpacks = [[NSMutableArray alloc] init];
     
     
    
-    
-    
-    NSArray *stickerpack_dir = [[NSArray alloc] initWithObjects:
-                                @"/stickers/01_catwang/",
 
-                                nil];
     
-    
-    
-    _stickerPackIDs = [[NSArray alloc] initWithObjects:
-                      @"com.99centbrains.catwangfree.01",
-
-                      nil];
-    
-    _stickerPackDictionary = [[NSMutableDictionary alloc]
-                             initWithObjects:stickerpack_dir
-                             forKeys:_stickerPackIDs];
-    
+    UIBarButtonItem *rightButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"BTN_DONE", @"Title") style:UIBarButtonItemStylePlain target:self action:@selector(iba_dismissCategoryView:)];
+    self.navigationItem.rightBarButtonItem = rightButton;
     
     
     [[UIApplication sharedApplication] setStatusBarHidden:YES withAnimation:UIStatusBarAnimationSlide];
     
-    
+    //NSLog(@"View did Load%@", );
    
     [super viewDidLoad];
     
@@ -117,29 +88,51 @@
     [super viewDidAppear:animated];
 
     
-    if (![[CWInAppHelper sharedHelper] products]){
-        [[CWInAppHelper sharedHelper] startRequest:@[kBuyKey]];
-    } else {
-        self.navigationItem.leftBarButtonItem.enabled = YES;
-    }
+//    if (![[CWInAppHelper sharedHelper] products]){
+//        [[CWInAppHelper sharedHelper] startRequest:@[kBuyKey]];
+//    } else {
+//        self.navigationItem.leftBarButtonItem.enabled = YES;
+//    }
     
-    //iAd
-    if (!_iAdBanner){
-        _iAdBanner = [[ADBannerView alloc] init];
-        _iAdBanner.frame = CGRectOffset(_iAdBanner.frame, 0, self.view.frame.size.height);
-        [self.view addSubview:_iAdBanner];
-        _iAdBanner.delegate = self;
-        iAdBannerVisible = NO;
-    }
+//    //iAd
+//    if (!_iAdBanner){
+//        _iAdBanner = [[ADBannerView alloc] init];
+//        _iAdBanner.frame = CGRectOffset(_iAdBanner.frame, 0, self.view.frame.size.height);
+//        [self.view addSubview:_iAdBanner];
+//        _iAdBanner.delegate = self;
+//        iAdBannerVisible = NO;
+//    }
+//    
     
+
+    
+    //
+    //PURCHASERS
+    [[NSNotificationCenter defaultCenter] addObserverForName:CWIAP_ProductPurchased
+                                                      object:nil
+                                                       queue:[[NSOperationQueue alloc] init]
+                                                  usingBlock:^(NSNotification *note) {
+                                                      
+                                                      
+                                                      [SVProgressHUD showSuccessWithStatus:@"Purchased"];
+                                                      
+                                                      dispatch_async(dispatch_get_main_queue(), ^{
+                                                          [_ibo_collectionView reloadData];
+                                                      });
+                                                      
+                                                      
+                                                  }];
     
     [[NSNotificationCenter defaultCenter] addObserverForName:CWIAP_Restore
                                                       object:nil
                                                        queue:[[NSOperationQueue alloc] init]
                                                   usingBlock:^(NSNotification *note) {
                                                       
+                                                      
+                                                     [SVProgressHUD showSuccessWithStatus:@"Restored"];
+                                                      
                                                       dispatch_async(dispatch_get_main_queue(), ^{
-                                                          [SVProgressHUD showSuccessWithStatus:@""];
+                                                          [_ibo_collectionView reloadData];
                                                       });
                                                       
                                                   }];
@@ -150,7 +143,10 @@
                                                        queue:[[NSOperationQueue alloc] init]
                                                   usingBlock:^(NSNotification *note) {
                                                       
-                                                      self.navigationItem.leftBarButtonItem.enabled = YES;
+                                                      dispatch_async(dispatch_get_main_queue(), ^{
+                                                          [_ibo_collectionView reloadData];
+                                                          self.navigationItem.leftBarButtonItem.enabled = YES;
+                                                      });
                                                       
                                                   }];
 
@@ -170,7 +166,7 @@
         iAdBannerVisible = NO;
     }
     
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    
 
     
 }
@@ -186,122 +182,102 @@
 - (void)iba_dismissCategoryView:(id)sender{
 
     [self dismissViewControllerAnimated:YES completion:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView{
     
-    return [_stickerPackIDs count];
+    return 1;
 
 }
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section{
     
 
-    return [[self getStickerPackWithKey:[_stickerPackIDs objectAtIndex:section]] count];
+    return [_prop_stickerPacks count];
 
-}
-- (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath {
-    
-    StickerTitleCollectionReusableView *header = (StickerTitleCollectionReusableView *)[collectionView dequeueReusableSupplementaryViewOfKind:UICollectionElementKindSectionHeader withReuseIdentifier:@"titleCell" forIndexPath:indexPath];
-    header.ibo_title.text = NSLocalizedString(@"THE_INTERNET", @"Title");
-    header.delegate = self;
-    return header;
-    
 }
 
 -(void) stickerTitleClicked {
     
     UIStoryboard *sb = [UIStoryboard storyboardWithName:@"MainStoryboard" bundle:nil];
     
-    CybrFMStickrViewController *vc = (CybrFMStickrViewController *)[sb instantiateViewControllerWithIdentifier:@"seg_CybrFMStickrViewController"];
-    vc.delegate = self;
-    [self.navigationController pushViewController:vc animated:YES];
-
 }
+
+
 
 - (UICollectionViewCell*) collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath{
     
-    StickerCollectionViewCell *cell = (StickerCollectionViewCell *)[collectionView dequeueReusableCellWithReuseIdentifier:@"ibo_cell" forIndexPath:indexPath];
+    _ibo_pageControl.currentPage = indexPath.row;
     
-    
-    NSString *stickerName = [[self getStickerPackWithKey:[_stickerPackIDs objectAtIndex:indexPath.section]] objectAtIndex:indexPath.item];
-    stickerName = [stickerName stringByReplacingOccurrencesOfString:@".png" withString:@""];
+    StickerPackCollectionViewCell *cell = (StickerPackCollectionViewCell *)[collectionView dequeueReusableCellWithReuseIdentifier:@"packCell" forIndexPath:indexPath];
 
-    NSString *fileDir = [self getFileNameForKey:[_stickerPackIDs objectAtIndex:indexPath.section]];
+    cell.stickerPackDirectory = [_prop_stickerPacks objectAtIndex:indexPath.item];
+    cell.delegate = self;
+    cell.stickerPackID = [[_prop_folder_directories objectAtIndex:indexPath.row] objectAtIndex:0];
+    cell.stickerPackName = [[_prop_folder_directories objectAtIndex:indexPath.row] objectAtIndex:1];
+    
+    NSString *packID = [[_prop_folder_directories objectAtIndex:indexPath.row] objectAtIndex:0];
+    cell.pack_locked = [[NSUserDefaults standardUserDefaults] boolForKey:packID];
+   
+    
+    
+    //CHECK PURCHASE
+    [cell reload];
 
-    NSData *imageData = [NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:
-                                                        [fileDir stringByAppendingString:stickerName] ofType:@"png"]];
-    
-    cell.ibo_cellView.image = [UIImage imageWithData:imageData];
-    
-    NSLog(@"Cell %@",[fileDir stringByAppendingString:stickerName]);
+    //NSLog(@"CELL %@",  [_prop_stickerPacks objectAtIndex:indexPath.item]);
+
     
     return cell;
 }
 
+-(void) didFinishPickingStickerImage:(UIImage *)image{
+    
+    [self.delegate didFinishPickingStickerImage:image];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+
+}
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath{
 
-    StickerCollectionViewCell *cell = (StickerCollectionViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
-    
-    [self.delegate selectStickerPackQuickViewController:self
-                           didFinishPickingStickerImage:cell.ibo_cellView.image];
+//    StickerCollectionViewCell *cell = (StickerCollectionViewCell *)[collectionView
+//                                                                    cellForItemAtIndexPath:indexPath];
+//    [self.delegate selectStickerPackQuickViewController:self
+//                           didFinishPickingStickerImage:cell.ibo_cellView.image];
     
 }
 
 - (CGSize)collectionView:(UICollectionView *)collectionView
                   layout:(UICollectionViewLayout *)collectionViewLayout
   sizeForItemAtIndexPath:(NSIndexPath *)indexPath {
-    CGSize sizer;
-   
-    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad){
-        sizer = CGSizeMake(_ibo_collectionView.frame.size.width/6,
-                           _ibo_collectionView.frame.size.width/6);
-    } else {
-        sizer = CGSizeMake(_ibo_collectionView.frame.size.width/3,
-                          _ibo_collectionView.frame.size.width/3);
-    }
     
-    
-    
+    CGSize sizer = CGSizeMake(_ibo_collectionView.frame.size.width, _ibo_collectionView.frame.size.height);
     return sizer;
     
 }
 
--(void) selectStickerPackQuickViewController:(CybrFMStickrViewController *)controller
-                didFinishPickingStickerImage:(UIImage *)image{
 
-    [self.delegate selectStickerPackQuickViewController:self
-                           didFinishPickingStickerImage:image];
-
-}
-
-- (NSString *) getFileNameForKey:(NSString *)key{
-
-    NSString *categoryDirectory = [_stickerPackDictionary objectForKey:key];
-    return categoryDirectory;
-    
-}
 
 
 //GET STICKER PACK DIR FROM ID
-- (NSMutableArray *) getStickerPackWithKey:(NSString *)key{
+- (NSMutableArray *) getStickerPackFromDIR:(NSString *)key{
     NSError *error = nil;
     
     NSString *resourcePath = [[NSBundle mainBundle] resourcePath];
     NSFileManager *filemgr = [NSFileManager defaultManager];
-    NSString *categoryDirectory = [_stickerPackDictionary objectForKey:key];
     
     NSArray *filelist = [filemgr
                          contentsOfDirectoryAtPath:
-                         [resourcePath stringByAppendingString:categoryDirectory]
+                         [resourcePath stringByAppendingString:key]
                          error:&error];
-    if (error) {
-        NSLog(@"Error in getStickerPack: %@",[error localizedDescription]);
-        
-        //[//Flurry logError:@"Error: getStickerPack" message:[error localizedDescription] error:error];
-        // filelist = nil;
+    
+    NSMutableArray *temp = [[NSMutableArray alloc] init];
+    
+    for (NSString *file in filelist){
+        [temp addObject:[key stringByAppendingString:file]];
     }
     
-    return [filelist mutableCopy];
+    filelist = nil;
+    
+    return temp;
 }
 
 
@@ -312,8 +288,7 @@
 
 #pragma BANNER
 - (void)bannerViewDidLoadAd:(ADBannerView *)banner {
-    
-    
+
     if (!iAdBannerVisible){
         NSLog(@"SHOW BANNER");
         [UIView animateWithDuration:.5 animations:^{

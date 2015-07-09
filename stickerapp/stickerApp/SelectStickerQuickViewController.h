@@ -13,9 +13,7 @@
 
 @protocol SelectStickerQuickViewControllerDelegate <NSObject>
 
--(void) selectStickerPackQuickViewController:(SelectStickerQuickViewController *)controller  didFinishPickingStickerImage:(UIImage *)image;
-
--(void) selectStickerQuickViewControllerDidCancel:(SelectStickerQuickViewController *)controller;
+-(void) didFinishPickingStickerImage:(UIImage *)image;
 
 @end
 
@@ -25,5 +23,6 @@
 }
 
 @property (nonatomic, unsafe_unretained) id <SelectStickerQuickViewControllerDelegate> delegate;
+@property (nonatomic, strong) NSArray *prop_folder_directories;
 
 @end

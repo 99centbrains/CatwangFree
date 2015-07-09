@@ -21,5 +21,6 @@
 
 @property (nonatomic, unsafe_unretained) id <StickerTitleCollectionReusableViewDelegate> delegate;
 @property (nonatomic, weak) IBOutlet UILabel *ibo_title;
+@property (nonatomic, weak) IBOutlet UIButton *ibo_buyBtn;
 
 @end

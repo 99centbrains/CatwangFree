@@ -8,7 +8,7 @@
 #import "PlayViewController.h"
 #import "QuartzCore/QuartzCore.h"
 
-#import "SelectStickerQuickViewController.h"
+#import "StickerCategoryViewController.h"
 #import "StickyImageView.h"
 #import "PlayEditModeViewController.h"
 #import "ShareViewController.h"
@@ -19,7 +19,7 @@
 #import "UIImage+Trim.h"
 #import "PaintToolSetViewController.h"
 
-@interface PlayViewController ()<PaintToolSetViewControllerDelegate>{
+@interface PlayViewController ()<PaintToolSetViewControllerDelegate, StickerCategoryViewControllerDelegate>{
 
     UIPopoverController *popController;
 }
@@ -128,23 +128,32 @@
     _ibo_renderView.layer.masksToBounds = NO;
     _ibo_renderView.layer.shadowOpacity = .75f;
     
-    [self.navigationController setNavigationBarHidden:YES animated:NO];
 }
 
 - (IBAction)actionSelectSticker:(id)sender{
     
-
-    UIStoryboard *sb = [UIStoryboard storyboardWithName:@"MainStoryboard" bundle:nil];
     
-    UINavigationController *nav = (UINavigationController *)[sb instantiateViewControllerWithIdentifier:@"seg_NavigationController"];
+    UIStoryboard *sb = [UIStoryboard storyboardWithName:@"SelectStickerStoryboard" bundle:nil];
     
-    SelectStickerQuickViewController *vc = [nav.viewControllers objectAtIndex:0];
+    UINavigationController *nav = (UINavigationController *)[sb instantiateInitialViewController];
+    
+    
+    StickerCategoryViewController *vc = [nav.viewControllers objectAtIndex:0];
     vc.delegate = self;
     
-    [self presentViewController:nav animated:YES completion:^{
-        //
-    }];
-
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+        
+        _popController = [[UIPopoverController alloc] initWithContentViewController:nav];
+        _popController.popoverContentSize = CGSizeMake(200, 200);
+        [_popController presentPopoverFromRect:CGRectMake(self.view.frame.size.width/2, self.view.frame.size.height, 0, 0) inView:self.view permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
+        
+    } else {
+        
+        [self presentViewController:nav animated:YES completion:nil];
+        
+    }
+    
+    
 }
 
 //SELECT STICKER DELEGATES
