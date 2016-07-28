@@ -1,0 +1,10 @@
+PODS:
+  - DeepLinkKit (1.1.0)
+
+DEPENDENCIES:
+  - DeepLinkKit
+
+SPEC CHECKSUMS:
+  DeepLinkKit: 3979713c8a0b6bd3259fb7917e572acf56645a35
+
+COCOAPODS: 0.38.2

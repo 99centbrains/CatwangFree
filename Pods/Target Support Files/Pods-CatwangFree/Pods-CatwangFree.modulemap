@@ -1,0 +1,6 @@
+framework module Pods_CatwangFree {
+  umbrella header "Pods-CatwangFree-umbrella.h"
+
+  export *
+  module * { export * }
+}

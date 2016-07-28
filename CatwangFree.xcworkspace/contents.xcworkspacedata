@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:Podfile">
+   </FileRef>
+   <FileRef
+      location = "group:CatwangFree.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:Default@2x.png">
+   </FileRef>
+   <FileRef
+      location = "group:icon_itunes.png">
+   </FileRef>
+   <FileRef
+      location = "group:Icon-72.png">
+   </FileRef>
+   <FileRef
+      location = "group:Icon-76.png">
+   </FileRef>
+   <FileRef
+      location = "group:Icon-144.png">
+   </FileRef>
+   <FileRef
+      location = "group:Icon-152.png">
+   </FileRef>
+   <FileRef
+      location = "group:Icon-176.png">
+   </FileRef>
+   <FileRef
+      location = "group:Icon-ios7.png">
+   </FileRef>
+   <FileRef
+      location = "group:Icon.png">
+   </FileRef>
+   <FileRef
+      location = "group:Icon@2x.png">
+   </FileRef>
+   <FileRef
+      location = "group:Pods/Pods.xcodeproj">
+   </FileRef>
+</Workspace>
